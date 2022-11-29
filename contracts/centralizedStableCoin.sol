@@ -32,4 +32,37 @@ contract centralizedStableCoin is ERC20Burnable, Ownable {
     constructor(uint initialSupply) ERC20("CentralizedStableCoin", "CSC") {
         _mint(msg.sender, initialSupply);
     }
+
+    //backlisting overrides
+    function approve(
+        address spender,
+        uint256 value
+    ) public override notBlacklisted(msg.sender) notBlacklisted(spender) returns (bool) {
+        super.approve(spender, value);
+        return true;
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 value
+    )
+        public
+        override
+        notBlacklisted(msg.sender)
+        notBlacklisted(from)
+        notBlacklisted(to)
+        returns (bool)
+    {
+        super.transferFrom(from, to, value);
+        return true;
+    }
+
+    function transfer(
+        address to,
+        uint256 value
+    ) public override notBlacklisted(msg.sender) notBlacklisted(to) returns (bool) {
+        super.transfer(msg.sender, value);
+        return true;
+    }
 }
