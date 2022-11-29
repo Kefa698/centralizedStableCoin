@@ -19,6 +19,9 @@ contract centralizedStableCoin is ERC20Burnable, Ownable {
     mapping(address => bool) internal s_minters;
     mapping(address => uint256) internal s_mintersAllowed;
 
+    event Blacklisted(address indexed _account);
+    event UnBlacklisted(address indexed _account);
+
     ////modifiers
     modifier onlyminters() {
         require(s_minters[msg.sender], "not minter");
@@ -31,6 +34,21 @@ contract centralizedStableCoin is ERC20Burnable, Ownable {
 
     constructor(uint initialSupply) ERC20("CentralizedStableCoin", "CSC") {
         _mint(msg.sender, initialSupply);
+    }
+
+    //*****blacklisting functions*****/
+    function isBlacklisted(address _account) external view returns (bool) {
+        return s_blacklisted[_account];
+    }
+
+    function blacklist(address _account) external onlyOwner {
+        s_blacklisted[_account] = true;
+        emit Blacklisted(_account);
+    }
+
+    function unBlacklist(address _account) external onlyOwner {
+        s_blacklisted[_account] = false;
+        emit UnBlacklisted(_account);
     }
 
     //backlisting overrides
