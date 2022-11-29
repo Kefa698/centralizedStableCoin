@@ -14,7 +14,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 pragma solidity ^0.8.7;
 
-contract centralizedStableCoin is ERC20Burnable, Ownable {
+contract CentralizedStableCoin is ERC20Burnable, Ownable {
     mapping(address => bool) internal s_blacklisted;
     mapping(address => bool) internal s_minters;
     mapping(address => uint256) internal s_mintersAllowed;
