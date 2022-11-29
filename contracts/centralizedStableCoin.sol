@@ -21,7 +21,8 @@ contract centralizedStableCoin is ERC20Burnable, Ownable {
 
     event Blacklisted(address indexed _account);
     event UnBlacklisted(address indexed _account);
-
+    event MinterConfigured(address indexed minter, uint256 indexed minterAllowed);
+    event MinterRemoved(address indexed oldMinter);
     ////modifiers
     modifier onlyminters() {
         require(s_minters[msg.sender], "not minter");
@@ -34,6 +35,44 @@ contract centralizedStableCoin is ERC20Burnable, Ownable {
 
     constructor(uint initialSupply) ERC20("CentralizedStableCoin", "CSC") {
         _mint(msg.sender, initialSupply);
+    }
+
+    function mint(
+        address _to,
+        uint256 _amount
+    ) external onlyminters notBlacklisted(msg.sender) notBlacklisted(_to) returns (bool) {
+        require(_to != address(0), "not address zero");
+        require(_amount > 0, "amount should be more than zero");
+        uint256 mintingAllowed = s_mintersAllowed[msg.sender];
+        require(_amount <= mintingAllowed, "amount exceeded");
+        s_mintersAllowed[msg.sender] = mintingAllowed - _amount;
+        _mint(msg.sender, mintingAllowed);
+        return true;
+    }
+
+    function burn(uint256 _amount) public override onlyminters notBlacklisted(msg.sender) {
+        require(_amount > 0, "amount should be more than zero");
+        uint256 balance = balanceOf(msg.sender);
+        require(balance >= _amount, "burn amount exceeds balance");
+        _burn(_msgSender(), _amount);
+    }
+
+    /*******minter settings**************** */
+    function configureMinter(
+        address minter,
+        uint256 minterAllowed
+    ) external onlyOwner returns (bool) {
+        s_minters[minter] = true;
+        s_mintersAllowed[minter] = minterAllowed;
+        emit MinterConfigured(minter, minterAllowed);
+        return true;
+    }
+
+    function removeMinter(address minter) external onlyOwner returns (bool) {
+        s_minters[minter] = false;
+        s_mintersAllowed[minter] = 0;
+        emit MinterRemoved(minter);
+        return true;
     }
 
     //*****blacklisting functions*****/
