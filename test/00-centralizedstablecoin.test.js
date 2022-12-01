@@ -73,5 +73,12 @@ const { expect, assert } = require("chai")
                   const endingBalance = await centralizedStableCoin.balanceOf(deployer.address)
                   assert(endingBalance.sub(startingBalance).toString() == mintAmount.toString())
               })
+              it("blocks non-minters to mint", async function () {
+                  const mintAmount = ethers.utils.parseUnits("100", "ether")
+                  await centralizedStableCoin.connect(badActor.address)
+                  await expect(
+                      centralizedStableCoin.mint(badActor.address, mintAmount)
+                  ).to.be.revertedWith("not minter")
+              })
           })
       })
