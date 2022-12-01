@@ -1,6 +1,6 @@
 const { developmentChains } = require("../helper-hardhat-config")
 const { network, ethers, deployments } = require("hardhat")
-const { expect } = require("chai")
+const { expect, assert } = require("chai")
 
 !developmentChains.includes(network.name)
     ? describe.skip
@@ -29,13 +29,49 @@ const { expect } = require("chai")
                   ).to.emit("UnBlackListed")
               })
               it("blocks blacklisted address from transfering ether", async function () {
-                const transferAmount = ethers.utils.parseUnits("1", "ether")
-                const blackListedAccount = accounts[1]
-                const blacklistTx = await centralizedStableCoin.blacklist(blackListedAccount.address)
-                await blacklistTx.wait(1)
-                await expect(
-                    centralizedStableCoin.transfer(blackListedAccount.address, transferAmount)
-                ).to.be.revertedWith("blacklisted")
+                  const transferAmount = ethers.utils.parseUnits("1", "ether")
+                  const blackListedAccount = accounts[1]
+                  const blacklistTx = await centralizedStableCoin.blacklist(
+                      blackListedAccount.address
+                  )
+                  await blacklistTx.wait(1)
+                  await expect(
+                      centralizedStableCoin.transfer(blackListedAccount.address, transferAmount)
+                  ).to.be.revertedWith("blacklisted")
+              })
+          })
+          describe("configure minter", function () {
+              it("configures minter and emits an event", async function () {
+                  const startingBalance = await centralizedStableCoin.balanceOf(deployer.address)
+                  const mintAmount = ethers.utils.parseUnits("100", "ether")
+                  expect(
+                      await centralizedStableCoin.configureMinter(deployer.address, mintAmount)
+                  ).to.emit("MinterConfigured")
+              })
+              it("removes minter and emits an event", async function () {
+                  const mintAmount = ethers.utils.parseUnits("100", "ether")
+
+                  const minterTx = await centralizedStableCoin.configureMinter(
+                      deployer.address,
+                      mintAmount
+                  )
+                  await minterTx.wait(1)
+                  expect(await centralizedStableCoin.removeMinter(deployer.address)).to.emit(
+                      "MinterRemoved"
+                  )
+              })
+              it("allows minters to mint", async function () {
+                  const startingBalance = await centralizedStableCoin.balanceOf(deployer.address)
+                  const mintAmount = ethers.utils.parseUnits("100", "ether")
+                  const configureminterTx = await centralizedStableCoin.configureMinter(
+                      deployer.address,
+                      mintAmount
+                  )
+                  await configureminterTx.wait(1)
+                  const minterTx = await centralizedStableCoin.mint(deployer.address, mintAmount)
+                  await minterTx.wait(1)
+                  const endingBalance = await centralizedStableCoin.balanceOf(deployer.address)
+                  assert(endingBalance.sub(startingBalance).toString() == mintAmount.toString())
               })
           })
       })
