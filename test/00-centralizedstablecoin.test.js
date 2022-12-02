@@ -81,4 +81,22 @@ const { expect, assert } = require("chai")
                   ).to.be.revertedWith("not minter")
               })
           })
+          describe("burn", function () {
+              it("can burn", async function () {
+                  const startingBalance = await centralizedStableCoin.balanceOf(deployer.address)
+
+                  const burnAmount = ethers.utils.parseUnits("10", "ether")
+                  const configureBurnTx = await centralizedStableCoin.configureMinter(
+                      deployer.address,
+                      burnAmount
+                  )
+                  await configureBurnTx.wait(1)
+
+                  const burnTx = await centralizedStableCoin.burn(burnAmount)
+                  await burnTx.wait(1)
+
+                  const endingBalance = await centralizedStableCoin.balanceOf(deployer.address)
+                  assert(startingBalance.sub(burnAmount).toString() == endingBalance.toString())
+              })
+          })
       })
