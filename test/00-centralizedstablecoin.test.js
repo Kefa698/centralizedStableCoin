@@ -98,5 +98,6 @@ const { expect, assert } = require("chai")
                   const endingBalance = await centralizedStableCoin.balanceOf(deployer.address)
                   assert(startingBalance.sub(burnAmount).toString() == endingBalance.toString())
               })
+              
           })
       })
