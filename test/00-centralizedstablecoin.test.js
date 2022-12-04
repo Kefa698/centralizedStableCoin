@@ -28,7 +28,7 @@ const { expect, assert } = require("chai")
                       await centralizedStableCoin.unBlacklist(blackListedAccount.address)
                   ).to.emit("UnBlackListed")
               })
-              it("blocks blacklisted address from transfering ether", async function () {
+              it("blocks blacklisted address from transfering and approving ether", async function () {
                   const transferAmount = ethers.utils.parseUnits("1", "ether")
                   const blackListedAccount = accounts[1]
                   const blacklistTx = await centralizedStableCoin.blacklist(
@@ -36,8 +36,14 @@ const { expect, assert } = require("chai")
                   )
                   await blacklistTx.wait(1)
                   await expect(
+                    centralizedStableCoin.approve(blackListedAccount.address, transferAmount)
+                ).to.be.revertedWith("blacklisted")
+                  await expect(
                       centralizedStableCoin.transfer(blackListedAccount.address, transferAmount)
                   ).to.be.revertedWith("blacklisted")
+                  await expect(
+                    centralizedStableCoin.transferFrom(deployer.address,blackListedAccount.address, transferAmount)
+                ).to.be.revertedWith("blacklisted")
               })
           })
           describe("configure minter", function () {
@@ -91,6 +97,7 @@ const { expect, assert } = require("chai")
                       burnAmount
                   )
                   await configureBurnTx.wait(1)
+                  const blackListedAccount = accounts[0]
 
                   const burnTx = await centralizedStableCoin.burn(burnAmount)
                   await burnTx.wait(1)
@@ -98,6 +105,26 @@ const { expect, assert } = require("chai")
                   const endingBalance = await centralizedStableCoin.balanceOf(deployer.address)
                   assert(startingBalance.sub(burnAmount).toString() == endingBalance.toString())
               })
-              
+              it("can reverts if account is blacklisted after mint", async function () {
+                  const startingBalance = await centralizedStableCoin.balanceOf(deployer.address)
+
+                  const burnAmount = ethers.utils.parseUnits("10", "ether")
+                  const configureBurnTx = await centralizedStableCoin.configureMinter(
+                      deployer.address,
+                      burnAmount
+                  )
+                  await configureBurnTx.wait(1)
+                  const blackListedAccount = accounts[0]
+
+                  //   const burnTx = await centralizedStableCoin.burn(burnAmount)
+                  //   await burnTx.wait(1)
+                  await centralizedStableCoin.blacklist(blackListedAccount.address)
+                  await expect(centralizedStableCoin.burn(burnAmount)).to.be.revertedWith(
+                      "blacklisted"
+                  )
+
+                  //   const endingBalance = await centralizedStableCoin.balanceOf(deployer.address)
+                  //   assert(startingBalance.sub(burnAmount).toString() == endingBalance.toString())
+              })
           })
       })
