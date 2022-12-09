@@ -36,14 +36,18 @@ const { expect, assert } = require("chai")
                   )
                   await blacklistTx.wait(1)
                   await expect(
-                    centralizedStableCoin.approve(blackListedAccount.address, transferAmount)
-                ).to.be.revertedWith("blacklisted")
+                      centralizedStableCoin.approve(blackListedAccount.address, transferAmount)
+                  ).to.be.revertedWith("blacklisted")
                   await expect(
                       centralizedStableCoin.transfer(blackListedAccount.address, transferAmount)
                   ).to.be.revertedWith("blacklisted")
                   await expect(
-                    centralizedStableCoin.transferFrom(deployer.address,blackListedAccount.address, transferAmount)
-                ).to.be.revertedWith("blacklisted")
+                      centralizedStableCoin.transferFrom(
+                          deployer.address,
+                          blackListedAccount.address,
+                          transferAmount
+                      )
+                  ).to.be.revertedWith("blacklisted")
               })
           })
           describe("configure minter", function () {
