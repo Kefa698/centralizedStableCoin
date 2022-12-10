@@ -52,7 +52,6 @@ const { expect, assert } = require("chai")
           })
           describe("configure minter", function () {
               it("configures minter and emits an event", async function () {
-                  const startingBalance = await centralizedStableCoin.balanceOf(deployer.address)
                   const mintAmount = ethers.utils.parseUnits("100", "ether")
                   expect(
                       await centralizedStableCoin.configureMinter(deployer.address, mintAmount)
