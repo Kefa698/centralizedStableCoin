@@ -9,9 +9,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         ? 1
         : VERIFICATION_BLOCK_CONFIRMATIONS
     log("----------------------------------------------------")
-    const initialSupply = ethers.utils.parseUnits("10", "ether")
+    const initialSupply = ethers.utils.parseUnits("100000000000000", "ether")
     const args = [initialSupply]
-    const centralizedStablecoinDeployment = await deploy("CentralizedStableCoin", {
+    const centralizedStablecoinDeployment = await deploy("USDT", {
         from: deployer,
         args: args,
         log: true,
@@ -19,7 +19,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     })
 
     // Verify the deployment
-    if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
+    if (!developmentChains.includes(network.name) && process.env.BnB_API_KEY) {
         log("Verifying...")
         await verify(centralizedStablecoinDeployment.address, args)
     }
