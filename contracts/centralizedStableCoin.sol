@@ -14,7 +14,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 pragma solidity ^0.8.7;
 
-contract CentralizedStableCoin is ERC20Burnable, Ownable {
+contract USDT is ERC20Burnable, Ownable {
     mapping(address => bool) internal s_blacklisted;
     mapping(address => bool) internal s_minters;
     mapping(address => uint256) internal s_mintersAllowed;
@@ -33,7 +33,7 @@ contract CentralizedStableCoin is ERC20Burnable, Ownable {
         _;
     }
 
-    constructor(uint initialSupply) ERC20("CentralizedStableCoin", "CSC") {
+    constructor(uint initialSupply) ERC20("USDT", "USDT") {
         _mint(msg.sender, initialSupply);
     }
 
